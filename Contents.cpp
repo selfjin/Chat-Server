@@ -74,6 +74,12 @@ int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNu
 	*payload >> roomNum;
 	*roomNumOut = roomNum;
 
+	Contents_Room[Contents_Room_Search[roomNum]].playerNameList.push_back(
+		Contents_Player_Search[searchID]);
+
+	Contents_Player[Contents_Player_Search[searchID]]->RoomState = roomNum;
+	Contents_Player[Contents_Player_Search[searchID]]->roomVisited = true;
+
 	auto it = Contents_Room.begin();
 
 	if (it != Contents_Room.end())
@@ -83,7 +89,7 @@ int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNu
 		{
 			
 			*sendPacket << (BYTE)df_RESULT_ROOM_ENTER_OK;
-			*sendPacket << (int)(*it).second.roomNumber;
+			*sendPacket << (int)roomNum;
 			*sendPacket << (short)((*it).second.RoomName.size() * sizeof(WCHAR));
 			
 			for (int i = 0; i < (*it).second.RoomName.size(); i++)
@@ -105,19 +111,31 @@ int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNu
 				{
 					*sendPacket << nameData[n];
 				}
+
+				*sendPacket << Contents_Player[*playerName]->mySession->SessoinID;
 			}
 
+			/*for (auto wIT : (*it).second.playerNameList)
+			{
+				WCHAR nameData[dfNICK_MAX_LEN] = { 0, };
+				for (int n = 0; n < wIT.size(); n++)
+				{
+					nameData[n] = wIT[n];
+				}
+
+				for (int j = 0; j < dfNICK_MAX_LEN; j++)
+				{
+					
+				}
+			}*/
+
 			/////////////////
 
-			(*it).second.playerNameList.push_back(Contents_Player_Search[searchID]);
 
-			Contents_Player[Contents_Player_Search[searchID]]->RoomState = roomNum;
-			Contents_Player[Contents_Player_Search[searchID]]->roomVisited = true;
 
 
 			/////////////////
 
-			
 
 			return df_RESULT_ROOM_ENTER_OK;
 		}
@@ -134,11 +152,14 @@ int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNu
 }
 
 
+
+
 void MP_OtherUser(CPacket* sendPacket, std::wstring userName, int otherID)
 {
 	WCHAR input[dfNICK_MAX_LEN] = { 0, };
 
 	wcscpy_s(input, dfNICK_MAX_LEN, userName.c_str());
+
 
 	for (int i = 0; i < dfNICK_MAX_LEN; i++)
 	{
@@ -147,4 +168,50 @@ void MP_OtherUser(CPacket* sendPacket, std::wstring userName, int otherID)
 
 	*sendPacket << (int)otherID;
 
+}
+
+void RoomLeave(CPacket* sendPacket, int leaveID)
+{
+	Contents_Player[Contents_Player_Search[leaveID]]->roomVisited = false;
+	Contents_Player[Contents_Player_Search[leaveID]]->RoomState = 0;
+
+	*sendPacket << (int)leaveID;
+}
+
+void RoomDelete(CPacket* sendPacket, int roomNum)
+{
+
+	auto deleteRoomIterator = Contents_Room.find(Contents_Room_Search[roomNum]);
+
+	if (deleteRoomIterator != Contents_Room.end())
+	{
+		Contents_Room.erase(deleteRoomIterator);
+	}
+
+	*sendPacket << (int)roomNum;
+}
+
+
+void RoomMessagePacket(CPacket* payload, CPacket* sendPacket, int senderID)
+{
+	short recvMessageSize;
+
+	WCHAR message[1000];
+
+	*payload >> recvMessageSize;
+	
+	for (int i = 0; i < recvMessageSize / 2; i++)
+	{
+		*payload >> message[i];
+	}
+
+	*sendPacket << (int)senderID;
+	*sendPacket << (short)recvMessageSize;
+
+
+	for (int i = 0; i < recvMessageSize / 2; i++)
+	{
+		*sendPacket << (WCHAR)message[i];
+	}
+	
 }

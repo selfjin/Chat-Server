@@ -37,8 +37,12 @@ extern std::unordered_map<int, std::wstring> Contents_Room_Search;
 
 int RoomCreate(CPacket* payload, CPacket* sendPacket);
 
-
 int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNumOut);
 
-
 void MP_OtherUser(CPacket* sendPacket, std::wstring userName, int otherID);
+
+void RoomLeave(CPacket* sendPacket, int leaveID);
+
+void RoomDelete(CPacket* sendPacket, int roomNum);
+
+void RoomMessagePacket(CPacket* payload, CPacket* sendPacket, int senderID);
