@@ -568,6 +568,8 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
                 NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_LOGIN, sendPacket.getSize());
                 NETWORK_UNICAST(sendPacket.GetBufferPtr(), session, &sendHeader);
                 Contents_Player[userName] = new Player(session);
+                Contents_Player[userName]->loginState = true;
+                Contents_Player_Search[Contents_Player[userName]->mySession->SessoinID] = userName;
             }
             else                        // 중복되는 닉네임이 있을 경우
             {
@@ -587,6 +589,8 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
     }
     case df_REQ_ROOM_LIST:
     {
+        session->recvBuffer->moveBegin(sizeof(PACKET_HEADER));
+        
 
         PACKET_HEADER sendHeader;
         CPacket sendPacket;
@@ -595,6 +599,68 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
 
         NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_LIST, sendPacket.getSize());
         NETWORK_UNICAST(sendPacket.GetBufferPtr(), session, &sendHeader);
+
+        break;
+    }
+    case df_REQ_ROOM_CREATE:
+    {
+        session->recvBuffer->moveBegin(sizeof(PACKET_HEADER));
+        CPacket packet;
+        session->recvBuffer->Dequeue(packet.GetBufferPtr(), header->wPayloadSize);
+
+        PACKET_HEADER sendHeader;
+        CPacket sendPacket;
+
+        
+        int ret = RoomCreate(&packet, &sendPacket);
+        NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_CREATE, sendPacket.getSize());
+        NETWORK_UNICAST(sendPacket.GetBufferPtr(), session, &sendHeader);
+
+        // 생성 성공시 다른 유저들에게 알림
+        if (ret == df_RESULT_ROOM_CREATE_OK)
+        {
+            for (auto it : Contents_Player)
+            {
+                if (it.second->mySession->SessoinID != session->SessoinID)
+                {
+                    NETWORK_UNICAST(sendPacket.GetBufferPtr(), it.second->mySession, &sendHeader);
+                }
+            }
+        }
+
+        break;
+    }
+    case df_REQ_ROOM_ENTER:
+    {
+        session->recvBuffer->moveBegin(sizeof(PACKET_HEADER));
+        CPacket packet;
+        session->recvBuffer->Dequeue(packet.GetBufferPtr(), header->wPayloadSize);
+
+        PACKET_HEADER sendHeader;
+        CPacket sendPacket;
+
+        int roomNumOut = 0;
+        int ret = RoomVisited(&packet, &sendPacket, session->SessoinID, &roomNumOut);
+        NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_ENTER, sendPacket.getSize());
+
+        NETWORK_UNICAST(sendPacket.GetBufferPtr(), session, &sendHeader);
+
+        if (ret == df_RESULT_ROOM_ENTER_OK)
+        {
+            sendPacket.Clear();
+               
+            MP_OtherUser(&sendPacket, Contents_Player_Search[session->SessoinID],
+                session->SessoinID);
+            NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_USER_ENTER, sendPacket.getSize());
+
+            for (auto& it : Contents_Room[Contents_Room_Search[roomNumOut]].playerNameList)
+            {
+                if (Contents_Player[it]->mySession->SessoinID != session->SessoinID)
+                {
+                    NETWORK_UNICAST(sendPacket.GetBufferPtr(), Contents_Player[it]->mySession, &sendHeader);
+                }
+            }
+        }
 
         break;
     }
@@ -638,16 +704,13 @@ void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
             playerName != it.second.playerNameList.end();
             ++playerName)
         {
-            for (int nameNum = 0; nameNum < playerName->size(); nameNum++)  // 각 플레이어 이름의 문자 전송
-            {
-                *MakePacket << (*playerName)[nameNum];
-            }
 
-            int PaddingSize = (dfNICK_MAX_LEN) - playerName->size() ;
+            WCHAR nameData[dfNICK_MAX_LEN] = { 0, };
+            wcscpy_s(nameData, dfNICK_MAX_LEN, (*playerName).c_str());
 
-            for (int padding = 0; padding < PaddingSize; padding++)
+            for (int n = 0; n < dfNICK_MAX_LEN; n++)
             {
-                *MakePacket << (WCHAR)L'\0';
+                *MakePacket << nameData[n];
             }
         }
 

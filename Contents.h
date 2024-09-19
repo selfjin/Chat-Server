@@ -22,8 +22,23 @@ struct RoomState
 //  extern
 //-------------------------------------------------------------
 
-
 extern std::unordered_map<std::wstring , Player*> Contents_Player;
 
 extern std::map<std::wstring, RoomState> Contents_Room;
 
+extern std::map<int, std::wstring> Contents_Player_Search;
+
+extern std::unordered_map<int, std::wstring> Contents_Room_Search;
+
+//-------------------------------------------------------------
+//  Logic 
+//-------------------------------------------------------------
+
+
+int RoomCreate(CPacket* payload, CPacket* sendPacket);
+
+
+int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNumOut);
+
+
+void MP_OtherUser(CPacket* sendPacket, std::wstring userName, int otherID);

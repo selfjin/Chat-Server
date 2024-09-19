@@ -32,6 +32,9 @@ int CPacket::Enqueue(char* data, int bytes)
     {
         DebugBreak;
     }
+    memcpy(buffer + _end_index, data, bytes);
+    _end_index += bytes;
+    _size += bytes;
 #endif
 
     memcpy(buffer + _end_index, data, bytes);
@@ -61,7 +64,9 @@ int CPacket::Dequeue(char* data, int bytes)
 
 void CPacket::Clear(void)
 {
-    // 기능 추가 예정
+    _capacity = eBUFFER_DEFAULT;
+    _begin_index = _end_index = 0;
+    _size = 0;
 }
 
 int CPacket::moveBegin(int value)
@@ -114,7 +119,7 @@ CPacket& CPacket::operator<<(char chValue)
     return *this;
 }
 
-CPacket& CPacket::operator << (WCHAR& chValue)
+CPacket& CPacket::operator << (WCHAR chValue)
 {
     *(reinterpret_cast<WCHAR*>(buffer + _end_index)) = chValue;
     _end_index += sizeof(chValue);
@@ -191,6 +196,14 @@ CPacket& CPacket::operator>>(BYTE& byValue)
 CPacket& CPacket::operator>>(char& chValue)
 {
     chValue = *(reinterpret_cast<char*>(buffer + _begin_index));
+    _begin_index += sizeof(chValue);
+    _size -= sizeof(chValue);
+    return *this;
+}
+
+CPacket& CPacket::operator>>(WCHAR& chValue)
+{
+    chValue = *(reinterpret_cast<WCHAR*>(buffer + _begin_index));
     _begin_index += sizeof(chValue);
     _size -= sizeof(chValue);
     return *this;

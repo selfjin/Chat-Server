@@ -46,7 +46,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	CPacket& operator << (unsigned char byValue);
 	CPacket& operator << (char chValue);
-	CPacket& operator << (WCHAR& chValue);
+	CPacket& operator << (WCHAR chValue);
 
 	CPacket& operator << (short shValue);
 	CPacket& operator << (unsigned short wValue);
@@ -64,7 +64,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	CPacket& operator >> (BYTE& byValue);
 	CPacket& operator >> (char& chValue);
-	
+	CPacket& operator >> (WCHAR& chValue);
 
 	CPacket& operator >> (short& shValue);
 	CPacket& operator >> (WORD& wValue);

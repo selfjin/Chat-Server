@@ -61,6 +61,7 @@ struct Player
 	Session* mySession;
 	WCHAR NickName[15];
 
+	int RoomState = 0;
 	bool loginState = false;
 	bool roomVisited = false;
 };
@@ -110,4 +111,5 @@ private:
 void NET_PACKET_MP_LOGIN_RES(CPacket* MakePacket, BYTE reserve, int ID);
 
 void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum);
+
 
