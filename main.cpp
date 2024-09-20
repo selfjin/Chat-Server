@@ -52,7 +52,6 @@ int main()
 
 		Sleep(20);
 
-		
 		printf("%d\n", cnt++);
 	}
 

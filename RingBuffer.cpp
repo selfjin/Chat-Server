@@ -22,11 +22,6 @@ int RingBuffer::Enqueue(const char* data, int bytes)
     int capacity = _capacity;
     int bytes_to_write = min(bytes, capacity - _size); // Free Size와 비교
 
-    // 덮어쓰기가 발생하는지 확인
-    if (_size + bytes_to_write > capacity) {
-        // 덮어쓰기가 발생할 가능성이 있는 경우, 쓰기를 제한 ( 현재 테스트를 위해 일부만 쓰기 )
-        bytes_to_write = capacity - _size;
-    }
 
     // 만약 쓰려고 하는 바이트가, ( Free Size ) 보다 작거나 같다면
     if (bytes_to_write <= capacity - _end_index)

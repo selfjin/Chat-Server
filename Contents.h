@@ -31,6 +31,15 @@ extern std::map<int, std::wstring> Contents_Player_Search;
 extern std::unordered_map<int, std::wstring> Contents_Room_Search;
 
 //-------------------------------------------------------------
+//  NET_PACKET_MP_PROC  // Make Packet
+//-------------------------------------------------------------
+
+void NET_PACKET_MP_LOGIN_RES(CPacket* MakePacket, BYTE reserve, int ID);
+
+void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum);
+
+
+//-------------------------------------------------------------
 //  Logic 
 //-------------------------------------------------------------
 

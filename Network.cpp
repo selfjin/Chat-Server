@@ -457,6 +457,7 @@ void Network::netIOProcess_SEND()
 
 // 2. Procedure
 
+
 void Network::NET_PACKET_MP_HEADER(PACKET_HEADER* header, CPacket* payload, WORD msgType, WORD payLoadSize)
 {
     header->byCode = 0x89;
@@ -722,50 +723,6 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
 
 
 
-//-------------------------------------------------------------
-//  NET_PACKET_MP_PROC  // Make Packet
-//-------------------------------------------------------------
-
-
-void NET_PACKET_MP_LOGIN_RES(CPacket* MakePacket, BYTE reserve, int ID)
-{
-    *MakePacket << reserve;
-    *MakePacket << ID;
-}
-
-void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
-{
-    *MakePacket << roomNum;
-    
-    
-    for (auto& it : Contents_Room)
-    {
-        *MakePacket << it.second.roomNumber;
-        *MakePacket << (short)(it.second.RoomName.size() * sizeof(WCHAR));
-
-        for (const auto& wchar : it.second.RoomName)
-        {
-            *MakePacket << wchar;
-        }
-
-        *MakePacket << (BYTE)it.second.playerNameList.size();
-        
-        for (auto playerName = it.second.playerNameList.begin();
-            playerName != it.second.playerNameList.end();
-            ++playerName)
-        {
-
-            WCHAR nameData[dfNICK_MAX_LEN] = { 0, };
-            wcscpy_s(nameData, dfNICK_MAX_LEN, (*playerName).c_str());
-
-            for (int n = 0; n < dfNICK_MAX_LEN; n++)
-            {
-                *MakePacket << nameData[n];
-            }
-        }
-
-    }
-}
 
 
 void Network::SessionAdvisor()
@@ -825,8 +782,6 @@ void Network::SessionAdvisor()
                 }
             }
 
-            
-
             delete(*deletePlayer);
             deletePlayer = playerList.erase(deletePlayer);
         }
@@ -836,9 +791,6 @@ void Network::SessionAdvisor()
         }
 
     }
-
-    //////////////
-
 
 
 }

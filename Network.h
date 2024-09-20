@@ -92,7 +92,6 @@ public:
 	
 	
 	
-	
 private:
 
 	SOCKET Listen_Socket;
@@ -101,15 +100,10 @@ private:
 	int Session_ID_NUMBER = 0;
 	std::list<Session*> playerList;
 
+	void(*PACKET_PROCEDURE)(PACKET_HEADER* header, Session* session)
+		= nullptr;
 
 };
 
-//-------------------------------------------------------------
-//  NET_PACKET_MP_PROC  // Make Packet
-//-------------------------------------------------------------
-
-void NET_PACKET_MP_LOGIN_RES(CPacket* MakePacket, BYTE reserve, int ID);
-
-void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum);
 
 

@@ -32,9 +32,6 @@ int CPacket::Enqueue(char* data, int bytes)
     {
         DebugBreak;
     }
-    memcpy(buffer + _end_index, data, bytes);
-    _end_index += bytes;
-    _size += bytes;
 #endif
 
     memcpy(buffer + _end_index, data, bytes);
@@ -47,7 +44,6 @@ int CPacket::Enqueue(char* data, int bytes)
 
 int CPacket::Dequeue(char* data, int bytes)
 {
-
 #ifdef DEBUG
     if (bytes > _size)
     {

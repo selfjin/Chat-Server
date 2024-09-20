@@ -14,6 +14,51 @@ int g_RoomNumber = 1;
 
 
 //-------------------------------------------------------------
+//  NET_PACKET_MP_PROC  // Make Packet
+//-------------------------------------------------------------
+
+
+void NET_PACKET_MP_LOGIN_RES(CPacket* MakePacket, BYTE reserve, int ID)
+{
+	*MakePacket << reserve;
+	*MakePacket << ID;
+}
+
+void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
+{
+	*MakePacket << roomNum;
+
+
+	for (auto& it : Contents_Room)
+	{
+		*MakePacket << it.second.roomNumber;
+		*MakePacket << (short)(it.second.RoomName.size() * sizeof(WCHAR));
+
+		for (const auto& wchar : it.second.RoomName)
+		{
+			*MakePacket << wchar;
+		}
+
+		*MakePacket << (BYTE)it.second.playerNameList.size();
+
+		for (auto playerName = it.second.playerNameList.begin();
+			playerName != it.second.playerNameList.end();
+			++playerName)
+		{
+
+			WCHAR nameData[dfNICK_MAX_LEN] = { 0, };
+			wcscpy_s(nameData, dfNICK_MAX_LEN, (*playerName).c_str());
+
+			for (int n = 0; n < dfNICK_MAX_LEN; n++)
+			{
+				*MakePacket << nameData[n];
+			}
+		}
+
+	}
+}
+
+//-------------------------------------------------------------
 //  Logic 
 //-------------------------------------------------------------
 
@@ -120,28 +165,6 @@ int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNu
 
 				*sendPacket << Contents_Player[*playerName]->mySession->SessoinID;
 			}
-
-			/*for (auto wIT : (*it).second.playerNameList)
-			{
-				WCHAR nameData[dfNICK_MAX_LEN] = { 0, };
-				for (int n = 0; n < wIT.size(); n++)
-				{
-					nameData[n] = wIT[n];
-				}
-
-				for (int j = 0; j < dfNICK_MAX_LEN; j++)
-				{
-					
-				}
-			}*/
-
-			/////////////////
-
-
-
-
-			/////////////////
-
 
 			return df_RESULT_ROOM_ENTER_OK;
 		}
