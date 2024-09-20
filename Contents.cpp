@@ -34,6 +34,7 @@ void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
 		*MakePacket << it.second.roomNumber;
 		*MakePacket << (short)(it.second.RoomName.size() * sizeof(WCHAR));
 
+
 		for (const auto& wchar : it.second.RoomName)
 		{
 			*MakePacket << wchar;
