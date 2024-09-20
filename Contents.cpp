@@ -244,3 +244,13 @@ void RoomMessagePacket(CPacket* payload, CPacket* sendPacket, int senderID)
 	}
 	
 }
+
+void EhcoRogic(CPacket* payload, CPacket* sendPacket)
+{
+	WORD recvMessageSize;
+
+	*payload >> recvMessageSize;
+
+
+
+}

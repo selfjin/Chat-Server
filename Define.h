@@ -12,6 +12,9 @@
 #define dfNICK_MAX_LEN		15			// 유니코드 글자 길이 NULL 문자 포함
 #define dfPACKET_CODE		0x89
 
+#define df_REQ_STRESS_ECHO				100
+#define df_RES_STRESS_ECHO				101
+
 
 //------------------------------------------------------
 //  패킷헤더

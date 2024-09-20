@@ -829,6 +829,22 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
 
         break;
     }
+    case df_REQ_STRESS_ECHO:
+    {
+        session->recvBuffer->moveBegin(sizeof(PACKET_HEADER));
+        CPacket packet;
+        session->recvBuffer->Dequeue(packet.GetBufferPtr(), header->wPayloadSize);
+
+        PACKET_HEADER sendHeader;
+        CPacket sendPacket;
+
+        EhcoRogic(&packet, &sendPacket);
+        NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_STRESS_ECHO, sendPacket.getSize());
+
+        NETWORK_UNICAST(sendPacket.GetBufferPtr(), session, &sendHeader);
+
+        break;
+    }
 
     default:
         break;
