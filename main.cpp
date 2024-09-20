@@ -48,11 +48,13 @@ int main()
 
 		g_Server.netIOProcess_SEND();
 
-		Sleep(20);
+		g_Server.SessionAdvisor();
 
+		Sleep(20);
 
 		
 		printf("%d\n", cnt++);
 	}
 
 }
+

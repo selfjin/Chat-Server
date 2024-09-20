@@ -450,31 +450,6 @@ void Network::netIOProcess_SEND()
     }
 }
 
-void Network::SessionAdvisor()
-{
-
-    auto deletePlayer = playerList.begin();
-
-
-    while (deletePlayer != playerList.end())
-    {
-        if ((*deletePlayer)->Alive == false)
-        {
-            delete(*deletePlayer);
-            deletePlayer = playerList.erase(deletePlayer);
-        }
-        else
-        {
-            deletePlayer++;
-        }
-
-    }
-
-    //////////////
-
-    
-    
-}
 
 
 
@@ -708,7 +683,6 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
             {
                 NETWORK_UNICAST(sendPacket.GetBufferPtr(), it.second->mySession, &sendHeader);
             }
-
         }
         
         break;
@@ -791,4 +765,80 @@ void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
         }
 
     }
+}
+
+
+void Network::SessionAdvisor()
+{
+
+    auto deletePlayer = playerList.begin();
+
+
+    while (deletePlayer != playerList.end())
+    {
+        if ((*deletePlayer)->Alive == false)
+        {
+
+            auto playerSearchIter = Contents_Player_Search.find((*deletePlayer)->SessoinID);
+            if (playerSearchIter != Contents_Player_Search.end())
+            {
+                if (Contents_Player[Contents_Player_Search[(*deletePlayer)->SessoinID]]->roomVisited)
+                {
+                    PACKET_HEADER sendHeader;
+                    CPacket sendPacket;
+
+                    // 유저가 속한 방의 No
+                    int outRoomNum = Contents_Player[Contents_Player_Search[(*deletePlayer)->SessoinID]]->RoomState;
+
+                    RoomLeave(&sendPacket, (*deletePlayer)->SessoinID);
+                    NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_LEAVE, sendPacket.getSize());
+
+                    for (auto& it : Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList)
+                    {
+                        NETWORK_UNICAST(sendPacket.GetBufferPtr(), Contents_Player[it]->mySession, &sendHeader);
+                    }
+
+
+                    //해당 유저를 방에서 삭제, 그러나 그 유저가 마지막 유저였다면, 방 또한 삭제함.
+
+                    auto deleteUserIterator = std::find(
+                        Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.begin(),
+                        Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.end(),
+                        Contents_Player_Search[(*deletePlayer)->SessoinID]
+                    );
+                    Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.erase(deleteUserIterator);
+
+                    if (Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.size() == 0)
+                    {
+                        // 방 삭제 패킷 전 인원에게 전송
+                        sendPacket.Clear();
+
+                        RoomDelete(&sendPacket, outRoomNum);
+                        NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_DELETE, sendPacket.getSize());
+
+                        for (auto it : Contents_Player)
+                        {
+                            NETWORK_UNICAST(sendPacket.GetBufferPtr(), it.second->mySession, &sendHeader);
+                        }
+                    }
+
+                }
+            }
+
+            
+
+            delete(*deletePlayer);
+            deletePlayer = playerList.erase(deletePlayer);
+        }
+        else
+        {
+            deletePlayer++;
+        }
+
+    }
+
+    //////////////
+
+
+
 }

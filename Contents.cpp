@@ -74,6 +74,12 @@ int RoomVisited(CPacket* payload, CPacket* sendPacket, int searchID, int* roomNu
 	*payload >> roomNum;
 	*roomNumOut = roomNum;
 
+	if (Contents_Player[Contents_Player_Search[searchID]]->roomVisited)
+	{
+		*sendPacket << (BYTE)df_RESULT_ROOM_ENTER_NOT;
+		return df_RESULT_ROOM_ENTER_NOT;
+	}
+
 	Contents_Room[Contents_Room_Search[roomNum]].playerNameList.push_back(
 		Contents_Player_Search[searchID]);
 
