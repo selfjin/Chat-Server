@@ -100,8 +100,6 @@ private:
 	int Session_ID_NUMBER = 0;
 	std::list<Session*> playerList;
 
-	void(*PACKET_PROCEDURE)(PACKET_HEADER* header, Session* session)
-		= nullptr;
 
 };
 
