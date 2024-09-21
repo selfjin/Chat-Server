@@ -37,20 +37,20 @@ int main()
 	// ---------------------------------------------------------------------/
 	//							     Main
 	// --------------------------------------------------------------------/
-
-	int cnt = 12;
+	
+	int cnt = 125;
 
 	while (!g_ShutDown)
 	{
 		g_Server.netIOProcess_LISTEN();
 
-		//g_Server.netIOProcess_RECV();
 		g_Server.netIoProcess_SelectRecvSend();
-		//g_Server.netIOProcess_SEND();
-
+		
 		g_Server.SessionAdvisor();
 
+		//Sleep(20);
 	}
+
 
 }
 
