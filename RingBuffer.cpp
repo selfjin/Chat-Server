@@ -15,6 +15,7 @@ RingBuffer::~RingBuffer()
     delete[] buffer;
 }
 
+
 int RingBuffer::Enqueue(const char* data, int bytes)
 {
     if (bytes == 0) return 0;

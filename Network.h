@@ -84,6 +84,9 @@ public:
 	void netIOProcess_RECV();
 	void netIOProcess_SEND();
 
+	
+	void netIoProcess_SelectRecvSend();
+
 	void SessionAdvisor();
 
 
@@ -100,6 +103,10 @@ private:
 	int Session_ID_NUMBER = 0;
 	std::list<Session*> playerList;
 
+	fd_set _reads;
+	fd_set _writes;
+
+	timeval select_Non_Blocking;
 
 };
 

@@ -35,10 +35,12 @@ void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
 		*MakePacket << (short)(it.second.RoomName.size() * sizeof(WCHAR));
 
 
-		for (const auto& wchar : it.second.RoomName)
+		MakePacket->Enqueue((char*)it.second.RoomName.c_str(), it.second.RoomName.size() * sizeof(WCHAR));
+
+		/*for (const auto& wchar : it.second.RoomName)
 		{
-			*MakePacket << wchar;
-		}
+			*MakePacket << wchar;		// 직렬화 버퍼 사용 방식, 그러나 이 방식은 함수 호출이 너무 많음.
+		}*/
 
 		*MakePacket << (BYTE)it.second.playerNameList.size();
 
@@ -50,10 +52,12 @@ void NET_PACKET_MP_ROOM_LIST(CPacket* MakePacket, short roomNum)
 			WCHAR nameData[dfNICK_MAX_LEN] = { 0, };
 			wcscpy_s(nameData, dfNICK_MAX_LEN, (*playerName).c_str());
 
-			for (int n = 0; n < dfNICK_MAX_LEN; n++)
+			/*for (int n = 0; n < dfNICK_MAX_LEN; n++)
 			{
-				*MakePacket << nameData[n];
-			}
+				*MakePacket << nameData[n];			// 직렬화 버퍼 사용 방식, 
+			}*/
+
+			MakePacket->Enqueue((char*)nameData, dfNICK_MAX_LEN * sizeof(WCHAR));
 		}
 
 	}
@@ -226,32 +230,47 @@ void RoomMessagePacket(CPacket* payload, CPacket* sendPacket, int senderID)
 {
 	short recvMessageSize;
 
-	WCHAR message[1000];
+	//WCHAR message[1000];
+	char message[1000] = { 0, };
 
 	*payload >> recvMessageSize;
 	
-	for (int i = 0; i < recvMessageSize / 2; i++)
+	/*for (int i = 0; i < recvMessageSize / 2; i++)
 	{
-		*payload >> message[i];
-	}
+		*payload >> message[i];				// 직렬화 버퍼 사용 방식
+	}*/
+
+	payload->Dequeue((char*)message, (int)recvMessageSize);
 
 	*sendPacket << (int)senderID;
 	*sendPacket << (short)recvMessageSize;
 
+	sendPacket->Enqueue((char*)message, (int)recvMessageSize);
 
-	for (int i = 0; i < recvMessageSize / 2; i++)
+	/*for (int i = 0; i < recvMessageSize / 2; i++)
 	{
-		*sendPacket << (WCHAR)message[i];
-	}
+		*sendPacket << (WCHAR)message[i];		// 직렬화 버퍼 사용 방식
+	}*/
 	
 }
 
 void EhcoRogic(CPacket* payload, CPacket* sendPacket)
 {
-	WORD recvMessageSize;
+	short recvMessageSize;
 
 	*payload >> recvMessageSize;
 
+	// payLoad 처리를 하는 개념으로, 에코 테스트에서 받은 것을 그대로 돌려보내지 않기 위해 별도로 하는 작업. // 성능은 더 느려집니다.
+	char payloadMessageBox[1000] = { 0 , };
+
+
+	payload->Dequeue(payloadMessageBox, (int)recvMessageSize);
+
+
+	*sendPacket << recvMessageSize;
+
+	sendPacket->Enqueue(payloadMessageBox, (int)recvMessageSize);
+	
 
 
 }

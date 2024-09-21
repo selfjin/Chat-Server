@@ -44,15 +44,12 @@ int main()
 	{
 		g_Server.netIOProcess_LISTEN();
 
-		g_Server.netIOProcess_RECV();
-
-		g_Server.netIOProcess_SEND();
+		//g_Server.netIOProcess_RECV();
+		g_Server.netIoProcess_SelectRecvSend();
+		//g_Server.netIOProcess_SEND();
 
 		g_Server.SessionAdvisor();
 
-		Sleep(20);
-
-		printf("%d\n", cnt++);
 	}
 
 }

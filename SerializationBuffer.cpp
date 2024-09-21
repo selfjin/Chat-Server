@@ -21,6 +21,10 @@ CPacket::CPacket(int capacity) :
 
 CPacket::~CPacket()
 {
+    /*if (_begin_index > _end_index)
+    {
+        DebugBreak();
+    }*/
     delete[] buffer;
 }
 
