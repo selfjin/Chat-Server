@@ -31,6 +31,14 @@ extern std::map<int, std::wstring> Contents_Player_Search;
 extern std::unordered_map<int, std::wstring> Contents_Room_Search;
 
 //-------------------------------------------------------------
+//  Packet Procedure
+//-------------------------------------------------------------
+
+void NETWORK_PROC(PACKET_HEADER* header, Session* session);
+void NET_PACKET_MP_HEADER(PACKET_HEADER* header, CPacket* payload, WORD msgType, WORD payLoadSize);
+
+
+//-------------------------------------------------------------
 //  NET_PACKET_MP_PROC  // Make Packet
 //-------------------------------------------------------------
 
@@ -57,3 +65,5 @@ void RoomDelete(CPacket* sendPacket, int roomNum);
 void RoomMessagePacket(CPacket* payload, CPacket* sendPacket, int senderID);
 
 void EhcoRogic(CPacket* payload, CPacket* sendPacket);
+
+void CONTETNTS_PLAYER_ADVISOR(int sessionID);

@@ -137,12 +137,14 @@
     <ClCompile Include="Define.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Network.cpp" />
+    <ClCompile Include="Profiler.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="SerializationBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Contents.h" />
     <ClInclude Include="Network.h" />
+    <ClInclude Include="Profiler.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="SerializationBuffer.h" />
   </ItemGroup>

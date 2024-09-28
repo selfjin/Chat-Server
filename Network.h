@@ -92,11 +92,18 @@ public:
 
 	void NETWORK_PROC(PACKET_HEADER* header, Session* session);
 	void NET_PACKET_MP_HEADER(PACKET_HEADER* header, CPacket* payload, WORD msgType, WORD payLoadSize);
+
+
+//-------------------------------------------------------------
+//  ÄÁÅÙÃ÷ ÄÚµå µî·Ï
+//-------------------------------------------------------------
 	
-	
-	
+	void (*PACKET_PROCEDURE_CALL)(PACKET_HEADER* header, Session* session) = nullptr;
+	void (*CONTETNTS_PLAYER_ADVISOR_CALL)(int sessionID) = nullptr;
+
 private:
 
+	
 	SOCKET Listen_Socket;
 	SOCKADDR_IN serverAddr;
 	

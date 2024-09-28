@@ -159,6 +159,7 @@ void Network::NETWORK_BROADCAST(char* packet, Session* exclude_Session, PACKET_H
     }
 }
 
+
 void Network::netIOProcess_LISTEN()
 {
     FD_SET reads;
@@ -188,7 +189,6 @@ void Network::netIOProcess_LISTEN()
         NETWORK_PROC_ACCEPT();
     }
 }
-
 
 
 void Network::netIOProcess_RECV()
@@ -476,8 +476,6 @@ void Network::netIOProcess_RECV()
 }
 
 
-
-
 void Network::netIOProcess_SEND()
 {
     fd_set writes;
@@ -557,412 +555,7 @@ void Network::netIOProcess_SEND()
     }
 }
 
-//void Network::netIoProcess_SelectRecvSend()
-//{
-//
-//    //-------------------------------------------------------------
-//    // SET
-//    //-------------------------------------------------------------
-//
-//    int totalUser = playerList.size();
-//
-//    if (totalUser == 0) return;
-//
-//    if (totalUser <= SELECT_MAX_SIZE)
-//    {
-//        //-------------------------------------------------------------
-//        // Pooling   /   SELECT_MAX_SIZE <= 64
-//        //-------------------------------------------------------------
-//
-//        // 1. read Set 초기화
-//        FD_ZERO(&_reads);
-//        FD_ZERO(&_writes);
-//
-//        // 2. Player Socket
-//        for (auto it : playerList)
-//        {
-//            FD_SET((*it).Sock, &_reads);
-//
-//            if ((*it).sendBuffer->getSize())
-//            {
-//                FD_SET((*it).Sock, &_writes);
-//            }
-//        }
-//
-//        // 3. Select
-//        int recvSelect = select(0, &_reads, &_writes, NULL, &select_Non_Blocking);
-//
-//#ifdef _DEBUG
-//        if (recvSelect == SOCKET_ERROR)
-//        {
-//            SOCK_ERROR_PRINT("select - recv");
-//            DebugBreak();
-//        }
-//#endif
-//
-//        for (auto recvPlayerIter : playerList)
-//        {
-//            if (FD_ISSET(recvPlayerIter->Sock, &_reads))
-//            {
-//                if ((*recvPlayerIter).Alive == false)
-//                {
-//                    continue;
-//                }
-//
-//                char Message[MESSAGE_BUFFER_SIZE] = { 0, };
-//
-//                int recvByte = recv((*recvPlayerIter).Sock, Message, MESSAGE_BUFFER_SIZE, 0);
-//
-//                if (recvByte == SOCKET_ERROR)
-//                {
-//                    if (WSAGetLastError() == WSAEWOULDBLOCK)
-//                    {
-//                        continue;
-//                    }
-//                    else
-//                    {
-//                        (*recvPlayerIter).Alive = false;
-//                        continue;
-//                    }
-//                }
-//
-//                if (recvByte == 0)
-//                {
-//                    (*recvPlayerIter).Alive = false;
-//                    continue;
-//                }
-//
-//                (*recvPlayerIter).recvBuffer->Enqueue(Message, recvByte);
-//
-//                while (1)
-//                {
-//                    PACKET_HEADER header;
-//                    int headerPeekSize = (*recvPlayerIter).recvBuffer->peek((char*)&header, sizeof(PACKET_HEADER));
-//
-//                    if (headerPeekSize < sizeof(header))
-//                    {
-//                        break;
-//                    }
-//
-//                    if (header.byCode != dfPACKET_CODE)
-//                    {
-//                        (*recvPlayerIter).Alive = false;
-//                        break;
-//                    }
-//
-//                    NETWORK_PROC(&header, recvPlayerIter);
-//
-//                    if ((*recvPlayerIter).recvBuffer->getSize() < sizeof(PACKET_HEADER))
-//                    {
-//                        break;
-//                    }
-//                }
-//            }
-//
-//            if (FD_ISSET((*recvPlayerIter).Sock, &_writes) && (*recvPlayerIter).Alive)
-//            {
-//
-//                char message[MESSAGE_BUFFER_SIZE] = { 0, };
-//
-//                int peekSize = (*recvPlayerIter).sendBuffer->peek(message, (*recvPlayerIter).sendBuffer->getSize());
-//
-//                int sendByteMessage = send((*recvPlayerIter).Sock, message, peekSize, 0);
-//
-//                if (sendByteMessage == SOCKET_ERROR)
-//                {
-//                    if (WSAGetLastError() == WSAEWOULDBLOCK)
-//                    {
-//                        (*recvPlayerIter).Alive = false;
-//                        continue;
-//                    }
-//                    else
-//                    {
-//                        (*recvPlayerIter).Alive = false;
-//                        continue;
-//                    }
-//                }
-//
-//                if (sendByteMessage == 0)
-//                {
-//                    (*recvPlayerIter).Alive = false;
-//                    continue;
-//                }
-//
-//                (*recvPlayerIter).sendBuffer->moveBegin(peekSize);
-//                //(*it).sendBuffer->Dequeue(message, peekSize);
-//            }
-//        }
-//
-//    }
-//    else
-//    {
-//        //-------------------------------------------------------------
-//        // Pooling   /   SELECT_MAX_SIZE > 64
-//        //-------------------------------------------------------------
-//        int poolingCount = totalUser / SELECT_MAX_SIZE;
-//        int poolingRemain = totalUser % SELECT_MAX_SIZE;
-//
-//        for (int i = 0; i < poolingCount; i++)
-//        {
-//            FD_ZERO(&_reads);
-//            FD_ZERO(&_writes);
-//            auto playerIterSet = playerList.begin();
-//            std::advance(playerIterSet, i * SELECT_MAX_SIZE);
-//
-//            for (int inRange = 0; inRange < SELECT_MAX_SIZE; inRange++)
-//            {
-//                FD_SET((*playerIterSet)->Sock, &_reads);
-//
-//                if ((*playerIterSet)->sendBuffer->getSize())
-//                {
-//                    FD_SET((*playerIterSet)->Sock, &_writes);
-//                }
-//                playerIterSet++;
-//            }
-//
-//            // 3. Select 처리
-//            int recvSelect = select(0, &_reads, &_writes, NULL, &select_Non_Blocking);
-//
-//#ifdef _DEBUG
-//            if (recvSelect == SOCKET_ERROR)
-//            {
-//                SOCK_ERROR_PRINT("select - recv");
-//                DebugBreak();
-//            }
-//#endif
-//            auto playerIterIsSet = playerList.begin();
-//            std::advance(playerIterIsSet, i * SELECT_MAX_SIZE);
-//
-//            for (int isSet = 0; isSet < SELECT_MAX_SIZE; isSet++)
-//            {
-//                if (FD_ISSET((*playerIterIsSet)->Sock, &_reads))
-//                {
-//                    if ((*playerIterIsSet)->Alive == false)
-//                    {
-//                        continue;
-//                    }
-//
-//                    char Message[MESSAGE_BUFFER_SIZE] = { 0, };
-//
-//                    int recvByte = recv((*playerIterIsSet)->Sock, Message, MESSAGE_BUFFER_SIZE, 0);
-//
-//                    if (recvByte == SOCKET_ERROR)
-//                    {
-//                        if (WSAGetLastError() == WSAEWOULDBLOCK)
-//                        {
-//                            continue;
-//                        }
-//                        else
-//                        {
-//                            (*playerIterIsSet)->Alive = false;
-//                            continue;
-//                        }
-//                    }
-//
-//                    if (recvByte == 0)
-//                    {
-//                        (*playerIterIsSet)->Alive = false;
-//                        continue;
-//                    }
-//
-//                    (*playerIterIsSet)->recvBuffer->Enqueue(Message, recvByte);
-//
-//                    while (1)
-//                    {
-//                        PACKET_HEADER header;
-//                        int headerPeekSize = (*playerIterIsSet)->recvBuffer->peek((char*)&header, sizeof(PACKET_HEADER));
-//
-//                        if (headerPeekSize < sizeof(header))
-//                        {
-//                            break;
-//                        }
-//
-//                        if (header.byCode != dfPACKET_CODE)
-//                        {
-//                            (*playerIterIsSet)->Alive = false;
-//                            break;
-//                        }
-//
-//                        NETWORK_PROC(&header, *playerIterIsSet);
-//
-//                        if ((*playerIterIsSet)->recvBuffer->getSize() < sizeof(PACKET_HEADER))
-//                        {
-//                            break;
-//                        }
-//                    }
-//                }
-//
-//                if (FD_ISSET((*playerIterIsSet)->Sock, &_writes))
-//                {
-//                    if ((*playerIterIsSet)->Alive == false)
-//                    {
-//                        continue;
-//                    }
-//                    char message[MESSAGE_BUFFER_SIZE] = { 0, };
-//
-//                    int peekSize = (*playerIterIsSet)->sendBuffer->peek(message, (*playerIterIsSet)->sendBuffer->getSize());
-//
-//                    int sendByteMessage = send((*playerIterIsSet)->Sock, message, peekSize, 0);
-//
-//                    if (sendByteMessage == SOCKET_ERROR)
-//                    {
-//                        if (WSAGetLastError() == WSAEWOULDBLOCK)
-//                        {
-//                            (*playerIterIsSet)->Alive = false;
-//                            continue;
-//                        }
-//                        else
-//                        {
-//                            (*playerIterIsSet)->Alive = false;
-//                            continue;
-//                        }
-//                    }
-//
-//                    if (sendByteMessage == 0)
-//                    {
-//                        (*playerIterIsSet)->Alive = false;
-//                        continue;
-//                    }
-//
-//                    //(*playerIterIsSet)->sendBuffer->moveBegin(peekSize);
-//                    (*playerIterIsSet)->sendBuffer->moveBegin(peekSize);
-//                }
-//
-//                playerIterIsSet++;
-//            }
-//        }
-//
-//        if (poolingRemain > 0)
-//        {
-//            FD_ZERO(&_reads);
-//            FD_ZERO(&_writes);
-//            auto reMainIter = playerList.begin();
-//            std::advance(reMainIter, poolingCount * SELECT_MAX_SIZE); // 남은 소켓의 시작점으로 이동
-//            for (int j = 0; j < poolingRemain; j++)
-//            {
-//                FD_SET((*reMainIter)->Sock, &_reads); // 남은 소켓을 FD_SET에 등록
-//
-//                if ((*reMainIter)->sendBuffer->getSize())
-//                {
-//                    FD_SET((*reMainIter)->Sock, &_writes);
-//                }
-//                reMainIter++;
-//            }
-//
-//            int remainSelect = select(0, &_reads, &_writes, NULL, &select_Non_Blocking);
-//
-//#ifdef _DEBUG
-//            if (remainSelect == SOCKET_ERROR)
-//            {
-//                DebugBreak();
-//            }
-//#endif 
-//
-//            auto remainIterIsSet = playerList.begin();
-//            std::advance(remainIterIsSet, poolingCount* SELECT_MAX_SIZE);
-//
-//            for (int i = 0; i < poolingRemain; i++)
-//            {
-//                if (FD_ISSET((*remainIterIsSet)->Sock, &_reads))
-//                {
-//                    if ((*remainIterIsSet)->Alive == false)
-//                    {
-//                        continue;
-//                    }
-//
-//                    char Message[MESSAGE_BUFFER_SIZE] = { 0, };
-//
-//                    int recvByte = recv((*remainIterIsSet)->Sock, Message, MESSAGE_BUFFER_SIZE, 0);
-//
-//                    if (recvByte == SOCKET_ERROR)
-//                    {
-//                        if (WSAGetLastError() == WSAEWOULDBLOCK)
-//                        {
-//                            continue;
-//                        }
-//                        else
-//                        {
-//                            (*remainIterIsSet)->Alive = false;
-//                            continue;
-//                        }
-//                    }
-//
-//                    if (recvByte == 0)
-//                    {
-//                        (*remainIterIsSet)->Alive = false;
-//                        continue;
-//                    }
-//
-//                    (*remainIterIsSet)->recvBuffer->Enqueue(Message, recvByte);
-//
-//                    while (1)
-//                    {
-//                        PACKET_HEADER header;
-//                        int headerPeekSize = (*remainIterIsSet)->recvBuffer->peek((char*)&header, sizeof(PACKET_HEADER));
-//
-//                        if (headerPeekSize < sizeof(header))
-//                        {
-//                            break;
-//                        }
-//
-//                        if (header.byCode != dfPACKET_CODE)
-//                        {
-//                            (*remainIterIsSet)->Alive = false;
-//                            break;
-//                        }
-//
-//                        NETWORK_PROC(&header, *remainIterIsSet);
-//
-//                        if ((*remainIterIsSet)->recvBuffer->getSize() < sizeof(PACKET_HEADER))
-//                        {
-//                            break;
-//                        }
-//                    }
-//                }
-//
-//                if (FD_ISSET((*remainIterIsSet)->Sock, &_writes))
-//                {
-//                    if ((*remainIterIsSet)->Alive == false)
-//                    {
-//                        continue;
-//                    }
-//                    char message[MESSAGE_BUFFER_SIZE] = { 0, };
-//
-//                    int peekSize = (*remainIterIsSet)->sendBuffer->peek(message, (*remainIterIsSet)->sendBuffer->getSize());
-//
-//                    int sendByteMessage = send((*remainIterIsSet)->Sock, message, peekSize, 0);
-//
-//                    if (sendByteMessage == SOCKET_ERROR)
-//                    {
-//                        if (WSAGetLastError() == WSAEWOULDBLOCK)
-//                        {
-//                            (*remainIterIsSet)->Alive = false;
-//                            continue;
-//                        }
-//                        else
-//                        {
-//                            (*remainIterIsSet)->Alive = false;
-//                            continue;
-//                        }
-//                    }
-//
-//                    if (sendByteMessage == 0)
-//                    {
-//                        (*remainIterIsSet)->Alive = false;
-//                        continue;
-//                    }
-//
-//                    //(*reMainIter)->sendBuffer->moveBegin(peekSize);
-//                    (*remainIterIsSet)->sendBuffer->Dequeue(message, peekSize);
-//                }
-//
-//
-//                remainIterIsSet++;
-//            }
-//        }
-//    }
-//
-//}
+
 
 void Network::netIoProcess_SelectRecvSend()
 {
@@ -1020,6 +613,7 @@ void Network::netIoProcess_SelectRecvSend()
                     continue;
                 }
 
+
                 char Message[MESSAGE_BUFFER_SIZE] = { 0, };
 
                 int recvByte = recv((*recvPlayerIter)->Sock, Message, MESSAGE_BUFFER_SIZE, 0);
@@ -1064,7 +658,11 @@ void Network::netIoProcess_SelectRecvSend()
                         break;
                     }
 
-                    NETWORK_PROC(&header, *recvPlayerIter);
+                    // 1. 클래스 함수 식 호출
+                    //NETWORK_PROC(&header, *recvPlayerIter);
+
+                    // 2. 컨텐츠 코드 분리
+                    PACKET_PROCEDURE_CALL(&header, *recvPlayerIter);
 
                     if ((*recvPlayerIter)->recvBuffer->getSize() < sizeof(PACKET_HEADER) + header.wPayloadSize)
                     {
@@ -1205,7 +803,12 @@ void Network::netIoProcess_SelectRecvSend()
                             break;
                         }
 
-                        NETWORK_PROC(&header, *playerIterIsSet);
+
+                        // 2. 컨텐츠 코드 분리
+                        PACKET_PROCEDURE_CALL(&header, *playerIterIsSet);
+
+                        //원 본
+                        //NETWORK_PROC(&header, *playerIterIsSet);
 
                         if ((*playerIterIsSet)->recvBuffer->getSize() < sizeof(PACKET_HEADER) + header.wPayloadSize)
                         {
@@ -1335,7 +938,11 @@ void Network::netIoProcess_SelectRecvSend()
                             break;
                         }
 
-                        NETWORK_PROC(&header, *remainIterIsSet);
+                        // 1. 클래스 함수 식 호출
+                        //NETWORK_PROC(&header, *remainIterIsSet);
+
+                        // 2. 컨텐츠 코드 분리
+                        PACKET_PROCEDURE_CALL(&header, *remainIterIsSet);
 
                         if ((*remainIterIsSet)->recvBuffer->getSize() < sizeof(PACKET_HEADER) + header.wPayloadSize)
                         {
@@ -1499,8 +1106,10 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
 
                 NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RESULT_LOGIN_DNICK, sendPacket.getSize());
                 NETWORK_UNICAST(sendPacket.GetBufferPtr(), session, &sendHeader);
+                
+                // 연결 종료
 
-                // False 해야 함
+                session->Alive = false;
             }
             
         }
@@ -1687,90 +1296,6 @@ void Network::NETWORK_PROC(PACKET_HEADER* header, Session* session)
 }
 
 
-
-
-//void Network::SessionAdvisor()
-//{
-//    auto deletePlayer = playerList.begin();
-//
-//    while (deletePlayer != playerList.end())
-//    {
-//        if ((*deletePlayer)->Alive == false)
-//        {
-//            auto playerSearchIter = Contents_Player_Search.find((*deletePlayer)->SessoinID);
-//            if (playerSearchIter != Contents_Player_Search.end())
-//            {
-//                Player* player = Contents_Player[playerSearchIter->second];
-//
-//                player->loginState = false;
-//
-//                if (player->roomVisited)
-//                {
-//
-//                    PACKET_HEADER sendHeader;
-//                    CPacket sendPacket;
-//
-//                    // 유저가 속한 방의 No
-//                    int outRoomNum = player->RoomState;
-//
-//                    RoomLeave(&sendPacket, (*deletePlayer)->SessoinID);
-//                    NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_LEAVE, sendPacket.getSize());
-//
-//                    // 방에 있는 다른 유저에게 방 나가기 알림
-//                    for (auto& it : Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList)
-//                    {
-//                        NETWORK_UNICAST(sendPacket.GetBufferPtr(), Contents_Player[it]->mySession, &sendHeader);
-//                    }
-//
-//                    // 해당 유저를 방에서 삭제
-//                    auto deleteUserIterator = std::find(
-//                        Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.begin(),
-//                        Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.end(),
-//                        playerSearchIter->second
-//                    );
-//
-//                    if (deleteUserIterator != Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.end())
-//                    {
-//                        Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.erase(deleteUserIterator);
-//                    }
-//
-//                    // 방에 유저가 없다면 방도 삭제
-//                    if (Contents_Room[Contents_Room_Search[outRoomNum]].playerNameList.empty())
-//                    {
-//                        sendPacket.Clear();
-//                        RoomDelete(&sendPacket, outRoomNum);
-//                        NET_PACKET_MP_HEADER(&sendHeader, &sendPacket, df_RES_ROOM_DELETE, sendPacket.getSize());
-//
-//                        for (auto& it : Contents_Player)
-//                        {
-//                            if (it.second->loginState != false && it.second->mySession->Alive != false)
-//                            {
-//                                NETWORK_UNICAST(sendPacket.GetBufferPtr(), it.second->mySession, &sendHeader);
-//                            }
-//                            
-//                        }
-//
-//                        Contents_Room.erase(Contents_Room_Search[outRoomNum]);
-//                        Contents_Room_Search.erase(outRoomNum);
-//                    }
-//
-//                    // 플레이어 삭제 처리 (플레이어 정보 지우기)
-//                    Contents_Player.erase(playerSearchIter->second);
-//                    Contents_Player_Search.erase(playerSearchIter);
-//                }
-//            }
-//
-//            delete* deletePlayer;
-//            deletePlayer = playerList.erase(deletePlayer);
-//        }
-//        else
-//        {
-//            ++deletePlayer;
-//        }
-//    }
-//}
-
-
 void Network::SessionAdvisor()
 {
 
@@ -1780,6 +1305,9 @@ void Network::SessionAdvisor()
     {
         if ((*deletePlayer)->Alive == false)
         {
+
+            CONTETNTS_PLAYER_ADVISOR_CALL((*deletePlayer)->SessoinID);
+
             closesocket((*deletePlayer)->Sock);
             delete (*deletePlayer);
 

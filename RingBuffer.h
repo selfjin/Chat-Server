@@ -38,6 +38,8 @@ public:
     ///////////////////////////////////////////////
 
 private:
+    
+
     int _begin_index;
     int _end_index;
     int _size;

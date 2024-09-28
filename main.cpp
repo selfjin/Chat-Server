@@ -6,7 +6,8 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include "Network.h"
-
+#include "Contents.h"
+#include "Profiler.h"
 //-------------------------------------------------------------
 //  define 및 전역 변수
 //-------------------------------------------------------------
@@ -33,24 +34,34 @@ int main()
 	}
 
 	std::cout << "startUp Success " << '\n';
+
+
+
+	// 1. 네트워크 코드가 처리할 패킷 프로시저 등록
+
+	g_Server.PACKET_PROCEDURE_CALL = NETWORK_PROC;
+	g_Server.CONTETNTS_PLAYER_ADVISOR_CALL = CONTETNTS_PLAYER_ADVISOR;
 	
 	// ---------------------------------------------------------------------/
 	//							     Main
 	// --------------------------------------------------------------------/
 	
-	int cnt = 125;
 
 	while (!g_ShutDown)
 	{
+		ProfileManager::GetInstance().ProfileBegin("Main");
+
 		g_Server.netIOProcess_LISTEN();
 
 		g_Server.netIoProcess_SelectRecvSend();
 		
 		g_Server.SessionAdvisor();
 
-		//Sleep(20);
+		ProfileManager::GetInstance().ProfileEnd("Main");
+
 	}
 
+	printf("End\n");
 
 }
 

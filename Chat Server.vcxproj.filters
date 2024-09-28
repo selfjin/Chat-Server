@@ -32,6 +32,9 @@
     <ClCompile Include="Contents.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Profiler.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RingBuffer.h">
@@ -45,6 +48,9 @@
     </ClInclude>
     <ClInclude Include="Contents.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler.h">
+      <Filter>Module</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
