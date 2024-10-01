@@ -27,7 +27,7 @@ public:
 	//							측정 관련 함수
 	//--------------------------------------------------------------------/
 	void ProfileBegin(std::string tagName);
-	void ProfileEnd(std::string tagName);
+	int ProfileEnd(std::string tagName);
 
 	//---------------------------------------------------------------------/
 	//						    출력 관련 함수

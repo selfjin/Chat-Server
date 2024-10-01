@@ -8,6 +8,7 @@
 #include "Network.h"
 #include "Contents.h"
 #include "Profiler.h"
+#include "ObjectMemoryPool.h"
 //-------------------------------------------------------------
 //  define 및 전역 변수
 //-------------------------------------------------------------
@@ -46,9 +47,13 @@ int main()
 	//							     Main
 	// --------------------------------------------------------------------/
 	
+	
+	printf("테스트 시작시 아무 키 입력 \n");
+	getchar();
 
 	while (!g_ShutDown)
 	{
+
 		ProfileManager::GetInstance().ProfileBegin("Main");
 
 		g_Server.netIOProcess_LISTEN();
@@ -57,7 +62,12 @@ int main()
 		
 		g_Server.SessionAdvisor();
 
-		ProfileManager::GetInstance().ProfileEnd("Main");
+		std::cout << ProfileManager::GetInstance().ProfileEnd("Main") << '\n';
+		if (ProfileManager::GetInstance().ProfileEnd("Main") == 30000)
+		{
+			std::cout << ProfileManager::GetInstance().ProfileEnd("Main") << '\n';
+			break;
+		}
 
 	}
 

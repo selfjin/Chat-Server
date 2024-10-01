@@ -38,9 +38,10 @@ void ProfileManager::ProfileBegin(std::string tagName)
 		}
 		ProfileManager::GetInstance()._ProfileMap[tagName] = temp;
 	}
+
 }
 
-void ProfileManager::ProfileEnd(std::string tagName)
+int ProfileManager::ProfileEnd(std::string tagName)
 {
 	auto it = ProfileManager::GetInstance()._ProfileMap.find(tagName);
 
@@ -77,8 +78,11 @@ void ProfileManager::ProfileEnd(std::string tagName)
 	else
 	{
 		printf("End 시점에 존재하지 않는 tagName\n");
+		DebugBreak();
 	}
 
+
+	return ProfileManager::GetInstance()._ProfileMap[tagName].st_Call;
 }
 
 
@@ -130,7 +134,7 @@ ProfileManager::~ProfileManager()
 		char member[256];
 		sprintf_s(member, sizeof(member), " %15s | %10.4f㎲ | %10.4f㎲ | %10.4f㎲ | %10d \n",
 			it.second.st_TagName.c_str(),
-			(double)it.second.st_TotalTime / (double)it.second.st_Call,
+			((double)it.second.st_TotalTime / (double)it.second.st_Call) * 10,
 			it.second.st_Min[0] / (double)it.second.st_Call,
 			it.second.st_Max[0] / (double)it.second.st_Call,
 			it.second.st_Call);

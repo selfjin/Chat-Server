@@ -1,6 +1,6 @@
 #include "Contents.h"
 #include "Network.h"
-
+#include "ObjectMemoryPool.h"
 
 
 std::unordered_map<std::wstring , Player*> Contents_Player;
@@ -10,6 +10,7 @@ std::map<std::wstring, RoomState> Contents_Room;
 std::unordered_map<int, std::wstring> Contents_Room_Search;
 
 
+ObjectMemoryPool<CPacket> TestMemoryPool(100000);
 
 int g_RoomNumber = 1;
 
@@ -242,19 +243,27 @@ void NETWORK_PROC(PACKET_HEADER* header, Session* session)
     case df_REQ_STRESS_ECHO:
     {
         session->recvBuffer->moveBegin(sizeof(PACKET_HEADER));
-        CPacket packet;
-        int value = session->recvBuffer->Dequeue(packet.GetBufferPtr(), header->wPayloadSize);
-        packet.moveEnd(value);
+        //CPacket packet;
+        CPacket* packet = TestMemoryPool.Alloc();
+        packet->Clear();
+
+        //int value = session->recvBuffer->Dequeue(packet.GetBufferPtr(), header->wPayloadSize);
+        int value = session->recvBuffer->Dequeue(packet->GetBufferPtr(), header->wPayloadSize);
+        packet->moveEnd(value);
 
 
         PACKET_HEADER sendHeader;
         //CPacket sendPacket;
 
         //EhcoRogic(&packet, &sendPacket);
-        NET_PACKET_MP_HEADER(&sendHeader, &packet, df_RES_STRESS_ECHO, packet.getSize());
+        //NET_PACKET_MP_HEADER(&sendHeader, &packet, df_RES_STRESS_ECHO, packet.getSize());
+        NET_PACKET_MP_HEADER(&sendHeader, packet, df_RES_STRESS_ECHO, packet->getSize());
 
-        g_Server.NETWORK_UNICAST(packet.GetBufferPtr(), session, &sendHeader);
+        //g_Server.NETWORK_UNICAST(packet.GetBufferPtr(), session, &sendHeader);
+        g_Server.NETWORK_UNICAST(packet->GetBufferPtr(), session, &sendHeader);
 
+        
+        TestMemoryPool.Free(packet);
         break;
     }
 

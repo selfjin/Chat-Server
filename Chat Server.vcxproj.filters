@@ -52,5 +52,8 @@
     <ClInclude Include="Profiler.h">
       <Filter>Module</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectMemoryPool.h">
+      <Filter>Module</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
